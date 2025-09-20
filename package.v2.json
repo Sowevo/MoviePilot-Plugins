@@ -3,12 +3,12 @@
     "name": "MediaTo115",
     "description": "通过命令选择媒体文件上传到115网盘。",
     "labels": "115,网盘",
-    "version": "0.0.1",
+    "version": "0.9.9",
     "icon": "",
     "author": "Sowevo",
     "level": 30,
     "history": {
-      "0.0.1": "初始版本"
+      "0.9.9": "初始版本"
     }
   }
 }
