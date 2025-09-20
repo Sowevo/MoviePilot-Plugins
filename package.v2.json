@@ -7,6 +7,7 @@
     "icon": "",
     "author": "Sowevo",
     "level": 30,
+    "release": true,
     "history": {
       "0.9.9": "初始版本"
     }
