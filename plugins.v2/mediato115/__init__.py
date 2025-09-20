@@ -16,7 +16,7 @@ from app.log import logger
 
 class MediaTo115(_PluginBase):
     # 插件名称
-    plugin_name = "MediaTo115"
+    plugin_name = "本地文件上传"
     # 插件描述
     plugin_desc = "通过命令选择媒体文件上传到115网盘。"
     # 插件图标
