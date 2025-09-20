@@ -24,7 +24,7 @@ class MediaTo115(_PluginBase):
     # 插件版本
     plugin_version = "0.0.1"
     # 插件作者
-    plugin_author = "sowevo"
+    plugin_author = "Sowevo"
     # 作者主页
     author_url = "https://github.com/sowevo"
     # 插件配置项ID前缀
