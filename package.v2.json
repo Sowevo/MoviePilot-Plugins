@@ -1,1 +1,14 @@
-{}
+{
+  "MediaTo115": {
+    "name": "MediaTo115",
+    "description": "通过命令选择媒体文件上传到115网盘。",
+    "labels": "115,晚盘",
+    "version": "0.0.1",
+    "icon": "",
+    "author": "sowevo",
+    "level": 30,
+    "history": {
+      "0.0.1": "初始版本"
+    }
+  }
+}
