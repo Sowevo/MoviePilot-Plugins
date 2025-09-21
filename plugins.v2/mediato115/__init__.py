@@ -22,7 +22,7 @@ class MediaTo115(_PluginBase):
     # 插件图标
     plugin_icon = ""
     # 插件版本
-    plugin_version = "0.0.2"
+    plugin_version = "0.0.3"
     # 插件作者
     plugin_author = "Sowevo"
     # 作者主页
@@ -68,24 +68,30 @@ class MediaTo115(_PluginBase):
             if not event_data or event_data.get("action") != "mediato115":
                 return
 
-            if not self._media_paths:
-                logger.info(f"未配置允许的目录")
+            if not self._media_paths or not self._media_paths.strip():
+                logger.warning("未配置允许的目录")
                 self.post_message(channel=event_data.get("channel"),
-                                  title=f"未配置允许的目录",
+                                  title="❌ 配置错误",
+                                  text="请先在插件配置中设置允许上传的本地媒体路径",
                                   userid=event_data.get("user"))
                 return
 
             args = event_data.get("arg_str")
-            if not args:
-                logger.info(f"缺少参数：{event_data}")
+            if not args or not args.strip():
+                logger.warning("缺少参数")
+                self.post_message(channel=event_data.get("channel"),
+                                  title="❌ 参数错误",
+                                  text="请提供媒体名称\n用法：/mediato115 电影名 或 /mediato115 剧集名",
+                                  userid=event_data.get("user"))
                 return
 
-            args_list = args.split(" ")
+            args_list = args.strip().split(" ")
             # 检查参数数量是否正确 (1个参数)
             if len(args_list) != 1:
-                logger.info(f"参数错误：{args_list}")
+                logger.warning(f"参数错误：{args_list}")
                 self.post_message(channel=event_data.get("channel"),
-                                  title=f"参数错误！ /mediato115 电影名 或 /mediato115 剧集名",
+                                  title="❌ 参数错误",
+                                  text="只能输入一个媒体名称\n用法：/mediato115 电影名 或 /mediato115 剧集名",
                                   userid=event_data.get("user"))
                 return
 
@@ -93,17 +99,14 @@ class MediaTo115(_PluginBase):
             if not media_items:
                 logger.info(f"未找到媒体：{args_list[0]}")
                 self.post_message(channel=event_data.get("channel"),
-                                  title=f"未找到媒体信息：{args_list[0]}",
+                                  title="❌ 未找到媒体",
+                                  text=f"未找到名为「{args_list[0]}」的媒体信息\n请检查媒体名称是否正确",
                                   userid=event_data.get("user"))
                 return
             elif len(media_items) > 1:
-                # 拼接媒体的名字
-                # noinspection PyTypeChecker
-                media_items_title = ",".join([media_item.title for media_item in media_items])
-
-                logger.info(f"找到多个媒体：{media_items_title}")
+                logger.info(f"找到{len(media_items)}个匹配的媒体项目")
                 # 发送带有交互按钮的消息,让用户选
-                self._send_main_menu(event_data,media_items)
+                self._send_main_menu(event_data, media_items)
                 return
 
             media_item = media_items[0]
@@ -116,27 +119,27 @@ class MediaTo115(_PluginBase):
         """
         channel = event_data.get("channel")
         userid = event_data.get("user")
-        # 遍历items的前4个,生成菜单
+        
+        # 限制显示前4个项目
         menu_items = items[:4]
-        # 生成菜单
+        
+        # 生成菜单按钮和文本
         menu_buttons = []
-        # 生成消息文本
-        menu_text = ""
-        for item in menu_items:
-            menu_buttons.append({"text": menu_items.index(item) + 1, "callback_data": f"[PLUGIN]{self.__class__.__name__}|{item.item_id}"})
-            menu_text += f"{menu_items.index(item) + 1}. {item.title}|{item.item_type}\n"
-
-        buttons = [
-            menu_buttons
-        ]
-
+        menu_text_lines = []
+        
+        for i, item in enumerate(menu_items, 1):
+            menu_buttons.append({
+                "text": str(i), 
+                "callback_data": f"[PLUGIN]{self.__class__.__name__}|{item.item_id}"
+            })
+            menu_text_lines.append(f"{i}. {item.title} ({item.item_type})")
 
         self.post_message(
             channel=channel,
-            title="发现多个匹配项目,请选择需要上传的项目：",
-            text=f"{menu_text}",
+            title="🔍 发现多个匹配项目",
+            text="请选择需要上传的项目：\n" + "\n".join(menu_text_lines),
             userid=userid,
-            buttons=buttons
+            buttons=[menu_buttons]
         )
 
     @eventmanager.register(EventType.MessageAction)
@@ -156,18 +159,29 @@ class MediaTo115(_PluginBase):
         # 获取回调数据
         item_id = event_data.get("text", "")
         logger.info(f"回调数据：{item_id}")
-        media_items = self.__get_media_by_item_id(item_id=item_id)
-        logger.info(f"查询到媒体：{media_items}")
-        if not media_items:
-            logger.info(f"未找到媒体：{item_id}")
+        
+        # 验证item_id
+        if not item_id or not item_id.strip():
+            logger.warning("回调数据为空")
             self.post_message(channel=event_data.get("channel"),
-                              title=f"未找到媒体信息：{item_id}",
+                              title="❌ 数据错误",
+                              text="回调数据无效",
+                              userid=event_data.get("user"))
+            return
+            
+        media_items = self.__get_media_by_item_id(item_id=item_id)
+        logger.debug(f"查询到{len(media_items) if media_items else 0}个媒体项目")
+        if not media_items:
+            logger.warning(f"未找到媒体：{item_id}")
+            self.post_message(channel=event_data.get("channel"),
+                              title="❌ 未找到媒体",
+                              text=f"未找到ID为「{item_id}」的媒体信息",
                               userid=event_data.get("user"))
             return
         media_item = media_items[0]
-        logger.info(f"上传媒体：{media_item.title}")
+        logger.info(f"用户选择媒体：{media_item.title} ({media_item.item_type})")
         # 上传到115
-        self.__upload_to_115(media_item,event_data)
+        self.__upload_to_115(media_item, event_data)
 
 
     def get_state(self) -> bool:
@@ -352,7 +366,7 @@ class MediaTo115(_PluginBase):
         """
         根据item_id查询媒体服务器媒体条目
         """
-        logger.info(f"根据item_id查询媒体服务器媒体条目：{item_id}")
+        logger.debug(f"根据item_id查询媒体服务器媒体条目：{item_id}")
         return db.query(MediaServerItem).filter(MediaServerItem.item_id == item_id).all()
 
 
@@ -360,24 +374,44 @@ class MediaTo115(_PluginBase):
         path = str(media_item.path)
         title = media_item.title
         item_type = media_item.item_type
-        logger.info(f"找到一个媒体{title}->{path}")
+        logger.info(f"开始处理媒体上传：{title} ({item_type}) -> {path}")
+        
+        # 验证媒体项目的基本信息
+        if not path or not title or not item_type:
+            logger.error(f"媒体信息不完整：path={path}, title={title}, item_type={item_type}")
+            self.post_message(channel=event_data.get("channel"),
+                              title="❌ 数据错误",
+                              text="媒体信息不完整，无法上传",
+                              userid=event_data.get("user"))
+            return
 
-        # 已选择的目录
-        paths = self._media_paths.split("\n")
+        # 获取允许的目录列表，去除空白字符和空行
+        allowed_paths = [p.strip() for p in self._media_paths.split("\n") if p.strip()]
+        
+        # 验证路径安全性
+        if not allowed_paths:
+            logger.error("没有配置允许的路径")
+            self.post_message(channel=event_data.get("channel"),
+                              title="❌ 配置错误",
+                              text="没有配置允许上传的路径",
+                              userid=event_data.get("user"))
+            return
 
         # 检查文件是否在允许的目录下
-        if not any(path.startswith(p) for p in paths):
-            logger.info(f"文件不在允许的目录下：{path}")
+        if not any(path.startswith(allowed_path) for allowed_path in allowed_paths):
+            logger.warning(f"文件不在允许的目录下：{path}")
             self.post_message(channel=event_data.get("channel"),
-                              title=f"文件不在允许的目录下：{path}",
+                              title="❌ 路径限制",
+                              text=f"文件路径不在允许的目录范围内\n文件：{path}\n请检查插件配置中的允许路径设置",
                               userid=event_data.get("user"))
             return
 
         # 检查文件是否存在
         if not os.path.exists(path):
-            logger.info(f"文件不存在：{path}")
+            logger.warning(f"文件不存在：{path}")
             self.post_message(channel=event_data.get("channel"),
-                              title=f"文件不存在：{path}",
+                              title="❌ 文件不存在",
+                              text=f"本地文件不存在或已被删除\n文件：{path}",
                               userid=event_data.get("user"))
             return
 
@@ -407,11 +441,15 @@ class MediaTo115(_PluginBase):
             background=True
         )
         if not state:
-            logger.info(f"转移失败：{errormsg}")
+            logger.error(f"转移失败：{errormsg}")
             self.post_message(channel=event_data.get("channel"),
-                              title=f"转移失败：{errormsg}",
+                              title="❌ 上传失败",
+                              text=f"文件上传到115网盘失败\n原因：{errormsg}",
                               userid=event_data.get("user"))
             return
+        
+        logger.info(f"转移任务创建成功：{title}")
         self.post_message(channel=event_data.get("channel"),
-                          title=f"转移任务创建成功：{title},请稍后",
+                          title="✅ 上传任务已创建",
+                          text=f"媒体「{title}」已加入上传队列\n请稍后查看上传进度",
                           userid=event_data.get("user"))
