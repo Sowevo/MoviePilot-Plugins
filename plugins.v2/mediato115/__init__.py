@@ -22,7 +22,7 @@ class MediaTo115(_PluginBase):
     # 插件图标
     plugin_icon = ""
     # 插件版本
-    plugin_version = "0.9.9"
+    plugin_version = "0.0.2"
     # 插件作者
     plugin_author = "Sowevo"
     # 作者主页
@@ -184,6 +184,104 @@ class MediaTo115(_PluginBase):
             {
                 'component': 'VForm',
                 'content': [
+                    {
+                        'component': 'VRow',
+                        'content': [
+                            {
+                                'component': 'VCol',
+                                'props': {
+                                    'cols': 12
+                                },
+                                'content': [
+                                    {
+                                        'component': 'VAlert',
+                                        'props': {
+                                            'type': 'info',
+                                            'variant': 'tonal'
+                                        },
+                                        'content': [
+                                            {
+                                                'component': 'div',
+                                                'content': [
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '【使用方法】'
+                                                    },
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '1. 在下方配置允许上传的本地媒体路径（每行一个目录）'
+                                                    },
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '2. 在聊天界面使用命令：/mediato115 电影名 或 /mediato115 剧集名'
+                                                    },
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '3. 系统会自动从媒体库中搜索匹配的媒体文件并上传到115网盘'
+                                                    },
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '4. 如果找到多个匹配项，会显示选择菜单供您选择'
+                                                    },
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '5. 只有位于配置路径下的文件才能被上传'
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },                                    {
+                                        'component': 'VAlert',
+                                        'props': {
+                                            'type': 'info',
+                                            'variant': 'tonal'
+                                        },
+                                        'content': [
+                                            {
+                                                'component': 'div',
+                                                'content': [
+                                                    {
+                                                        'component': 'div',
+                                                        'text': '使用本功能需要先进入 设定-目录 进行配置:'
+                                                    },{
+                                                        'component': 'div',
+                                                        'text': '1. 添加目录配置卡,需要按照媒体类型和媒体类别,资源存储选择本地,'
+                                                    },{
+                                                        'component': 'div',
+                                                        'props': {
+                                                            'style': {
+                                                                'margin-left': '20px'
+                                                            }
+                                                        },
+                                                        'text': '资源目录输入本地媒体库路径(应该与下方配置的[允许上传的本地媒体路径]一致)'
+                                                    },{
+                                                        'component': 'div',
+                                                        'text': '2.自动整理模式选择手动整理,媒体库存储选择115网盘,'
+                                                    },{
+                                                        'component': 'div',
+                                                        'props': {
+                                                            'style': {
+                                                                'margin-left': '20px'
+                                                            }
+                                                        },
+                                                        'text': '并配置好115网盘的目标路径,整理方式选择复制,按需配置分类,重命名通知'
+                                                    },{
+                                                        'component': 'div',
+                                                        'props': {
+                                                            'style': {
+                                                                'margin-left': '20px'
+                                                            }
+                                                        },
+                                                        'text': '本插件通过触发上面配置的目录的手动整理,实现文件上传'
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
                     {
                         'component': 'VRow',
                         'content': [

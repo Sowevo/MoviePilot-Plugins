@@ -3,13 +3,14 @@
     "name": "本地文件上传",
     "description": "通过命令选择媒体文件上传到115网盘。",
     "labels": "115,网盘",
-    "version": "0.9.9",
+    "version": "0.0.2",
     "icon": "",
     "author": "Sowevo",
     "level": 1,
     "release": true,
     "history": {
-      "0.9.9": "初始版本"
+      "0.0.1": "初始版本",
+      "0.0.2": "完善了配置说明"
     }
   }
 }
